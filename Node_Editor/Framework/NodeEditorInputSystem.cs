@@ -35,7 +35,7 @@ namespace NodeEditorFramework
 			contextFillers = new List<KeyValuePair<ContextFillerAttribute, Delegate>> ();
 
 			// Iterate through each static method
-			IEnumerable<Assembly> scriptAssemblies = AppDomain.CurrentDomain.GetAssemblies ().Where ((Assembly assembly) => assembly.FullName.Contains ("Assembly"));
+			IEnumerable<Assembly> scriptAssemblies = AppDomain.CurrentDomain.GetAssemblies ();
 			foreach (Assembly assembly in scriptAssemblies) 
 			{
 				foreach (Type type in assembly.GetTypes ()) 

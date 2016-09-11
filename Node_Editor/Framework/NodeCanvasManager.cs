@@ -18,8 +18,7 @@ namespace NodeEditorFramework
 		{
 			CanvasTypes = new Dictionary<Type, NodeCanvasTypeData>();
 
-			IEnumerable<Assembly> scriptAssemblies = AppDomain.CurrentDomain.GetAssemblies()
-					.Where((Assembly assembly) => assembly.FullName.Contains("Assembly"));
+			IEnumerable<Assembly> scriptAssemblies = AppDomain.CurrentDomain.GetAssemblies();
 			foreach (Assembly assembly in scriptAssemblies)
 			{
 				foreach (Type type in assembly.GetTypes()

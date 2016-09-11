@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using System;
-using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using System.Collections.Generic;
@@ -37,9 +36,15 @@ namespace NodeEditorFramework
 			if (types == null || types.Count == 0)
 				FetchTypes ();
 			TypeData typeData;
-			if (!types.TryGetValue (typeName, out typeData))
-			{
-				Type type = Type.GetType (typeName);
+			if (!types.TryGetValue (typeName, out typeData)){
+			    Type type = null;
+                foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies()){
+                    type = assembly.GetType(typeName);
+                    if (type != null){
+                        break;
+                    }
+                }
+
 				if (type == null)
 				{
 					typeData = types.First ().Value;
@@ -75,7 +80,7 @@ namespace NodeEditorFramework
 		{
 			types = new Dictionary<string, TypeData> { { "None", new TypeData (typeof(System.Object)) } };
 
-			IEnumerable<Assembly> scriptAssemblies = AppDomain.CurrentDomain.GetAssemblies ().Where ((Assembly assembly) => assembly.FullName.Contains ("Assembly"));
+			IEnumerable<Assembly> scriptAssemblies = AppDomain.CurrentDomain.GetAssemblies ();
 			foreach (Assembly assembly in scriptAssemblies) 
 			{
 				foreach (Type type in assembly.GetTypes ().Where (T => T.IsClass && !T.IsAbstract && T.GetInterfaces ().Contains (typeof (IConnectionTypeDeclaration)))) 

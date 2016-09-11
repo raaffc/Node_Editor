@@ -3,7 +3,7 @@
 using UnityEngine;
 using System;
 using System.Collections.Generic;
-
+using System.IO;
 using NodeEditorFramework;
 using NodeEditorFramework.Utilities;
 
@@ -126,21 +126,32 @@ namespace NodeEditorFramework
 			if (script == null) 
 			{
 				string[] assets = UnityEditor.AssetDatabase.FindAssets ("NodeEditorCallbackReceiver"); // Something relatively unique
-				if (assets.Length != 1) 
-				{
-					assets = UnityEditor.AssetDatabase.FindAssets ("ConnectionTypes"); // Another try
-					if (assets.Length != 1) 
-						throw new UnityException ("Node Editor: Not installed in default directory '" + editorPath + "'! Correct path could not be detected! Please correct the editorPath variable in NodeEditor.cs!");
+				if (assets.Length < 1) {
+					assets = UnityEditor.AssetDatabase.FindAssets ("Node_Editor_Resource_Root_Asset_Marker"); // Another try
 				}
+			    if (assets.Length < 1){
+			        throw new UnityException ("Node Editor: Not installed in default directory '" + editorPath + "'! Correct path could not be detected! Please correct the editorPath variable in NodeEditor.cs!");
+			    }
+
+			    var guid = assets[0];
+				string correctEditorPath = UnityEditor.AssetDatabase.GUIDToAssetPath (guid);
+
+			    var guessedPath = $"{Path.GetDirectoryName(correctEditorPath)}/Node_Editor/";
+			    if (UnityEditor.AssetDatabase.IsValidFolder(guessedPath + "Resources")){
+			        correctEditorPath = guessedPath;
+			    } else{
+				    int subFolderIndex = correctEditorPath.LastIndexOf ("Framework/");
+			        if (subFolderIndex == -1){
+    				    subFolderIndex = correctEditorPath.LastIndexOf ("Resources/");			        
+			        }
+			        if (subFolderIndex == -1){
+			            throw new UnityException ("Node Editor: Not installed in default directory '" + editorPath + "'! Correct path could not be detected! Please correct the editorPath variable in NodeEditor.cs!");
+			        }
+				    correctEditorPath = correctEditorPath.Substring (0, subFolderIndex);
+				    Debug.LogWarning ("Node Editor: Not installed in default directory '" + editorPath + "'! " +
+								      "Editor-only automatic detection adjusted the path to " + correctEditorPath + ", but if you plan to use at runtime, please correct the editorPath variable in NodeEditor.cs!");
+			    }
 				
-				string correctEditorPath = UnityEditor.AssetDatabase.GUIDToAssetPath (assets[0]);
-				int subFolderIndex = correctEditorPath.LastIndexOf ("Framework/");
-				if (subFolderIndex == -1)
-					throw new UnityException ("Node Editor: Not installed in default directory '" + editorPath + "'! Correct path could not be detected! Please correct the editorPath variable in NodeEditor.cs!");
-				correctEditorPath = correctEditorPath.Substring (0, subFolderIndex);
-				
-				Debug.LogWarning ("Node Editor: Not installed in default directory '" + editorPath + "'! " +
-								  "Editor-only automatic detection adjusted the path to " + correctEditorPath + ", but if you plan to use at runtime, please correct the editorPath variable in NodeEditor.cs!");
 				editorPath = correctEditorPath;
 			}
 	#endif
